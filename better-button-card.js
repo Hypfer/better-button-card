@@ -68,13 +68,33 @@ const HELPERS = {
 };
 
 
-class ButtonCard extends HTMLElement {
+class BetterButtonCard extends HTMLElement {
 
     constructor() {
         super();
         this.attachShadow({mode: 'open'});
     }
 
+    /**
+     *
+     * @param config {object}
+     * @param [config.title] {string}
+     * @param [config.entity] {string}
+     * @param [config.icon] {string}
+     * @param [config.color] {string}
+     * @param [config.size] {string}
+     * @param [config.color_off] {string}
+     * @param [config.default_color] {string}
+     * @param [config.name] {string}
+     * @param [config.show_state] {boolean}
+     * @param [config.color_style] {COLOR_STYLES}
+     * @param [config.style] custom CSS as seen in button-card
+     * @param [config.action] {ACTIONS}
+     * @param [config.service] {object}
+     * @param config.service.domain {string}
+     * @param config.service.action {string}
+     * @param config.service.data {object}
+     */
     setConfig(config) {
         const root = this.shadowRoot;
         if (root.lastChild) root.removeChild(root.lastChild);

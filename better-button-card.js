@@ -173,6 +173,8 @@ class BetterButtonCard extends HTMLElement {
 
         if (this._config.color_style === COLOR_STYLES.BACKGROUND) {
             this.content.style.cssText = `color: ${fontColor}; background-color: ${color}; ${this._config.card_style};`;
+        } else {
+            this.content.style.cssText = `${this._config.card_style}`;
         }
 
 

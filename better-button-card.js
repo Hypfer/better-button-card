@@ -191,6 +191,8 @@ class BetterButtonCard extends HTMLElement {
 
         this.content.appendChild(buttonElem);
 
+        const buttonContentContainer = document.createElement(("div"));
+
         if (this._config.icon) {
             const iconElem = document.createElement("ha-icon");
             iconElem.classList.add("button-card-icon");
@@ -201,14 +203,14 @@ class BetterButtonCard extends HTMLElement {
             }
 
             iconElem.setAttribute("icon", this._config.icon);
-            buttonElem.appendChild(iconElem);
+            buttonContentContainer.appendChild(iconElem);
         }
 
         if (this._config.name) {
             const nameElem = document.createElement("span");
             nameElem.innerText = this._config.name;
 
-            buttonElem.appendChild(nameElem);
+            buttonContentContainer.appendChild(nameElem);
         }
 
         if (this._config.show_state && this._config.entity && state) {
@@ -221,8 +223,10 @@ class BetterButtonCard extends HTMLElement {
             }
 
 
-            buttonElem.appendChild(stateElem);
+            buttonContentContainer.appendChild(stateElem);
         }
+        
+        buttonElem.appendChild(buttonContentContainer);
 
     }
 

@@ -159,9 +159,11 @@ class BetterButtonCard extends HTMLElement {
 
     render(state) {
         //clear Element
-        while (this.content.firstChild) {
-            this.content.removeChild(this.content.firstChild);
-        }
+        try {
+            while (this.content.firstChild) {
+                this.content.removeChild(this.content.firstChild);
+            }
+        } catch (e) {}
         this.content.style.cssText = "";
         this.content.removeAttribute("class"); //TODO is this needed? maybe
 

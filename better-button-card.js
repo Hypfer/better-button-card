@@ -86,7 +86,7 @@ class BetterButtonCard extends HTMLElement {
      * @param [config.color_off] {string}
      * @param [config.default_color] {string}
      * @param [config.name] {string}
-     * @param [config.show_state] {boolean}
+     * @param [config.show_state_label] {boolean}
      * @param [config.color_style] {COLOR_STYLES}
      * @param [config.style] custom CSS as seen in button-card
      * @param [config.action] {ACTIONS}
@@ -106,7 +106,7 @@ class BetterButtonCard extends HTMLElement {
             color_off: "var(--disabled-text-color)",
             default_color: "var(--primary-text-color)",
             name: "",
-            show_state: true,
+            show_state_label: true,
             color_style: COLOR_STYLES.BACKGROUND
         }, config);
         this._config.card_style = '';
@@ -136,6 +136,10 @@ class BetterButtonCard extends HTMLElement {
             
             .button-card-button-not-a-button {
                 cursor: default;
+            }
+            
+            ha-card {
+                height: 100%;
             }
           `;
 
@@ -213,7 +217,7 @@ class BetterButtonCard extends HTMLElement {
             buttonContentContainer.appendChild(nameElem);
         }
 
-        if (this._config.show_state && this._config.entity && state) {
+        if (this._config.show_state_label && this._config.entity && state) {
             const stateElem = document.createElement("span");
 
             if(state) {
@@ -225,7 +229,7 @@ class BetterButtonCard extends HTMLElement {
 
             buttonContentContainer.appendChild(stateElem);
         }
-        
+
         buttonElem.appendChild(buttonContentContainer);
 
     }

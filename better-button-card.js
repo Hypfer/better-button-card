@@ -30,12 +30,21 @@ const HELPERS = {
     },
 
     getFontColorBasedOnBackgroundColor: function (backgroundColor) {
+        backgroundColor = backgroundColor ? backgroundColor : "--paper-card-background-color";
+
+        if(backgroundColor.indexOf && backgroundColor.indexOf("--") === 0) {
+            backgroundColor = getComputedStyle(document.documentElement,null).getPropertyValue(backgroundColor);
+            if(backgroundColor.trim) {
+                backgroundColor = backgroundColor.trim();
+            }
+        }
+
         const parsedRgbColor = backgroundColor.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
         const parsedBackgroundColor = parsedRgbColor ? parsedRgbColor : this.hexToRgb(backgroundColor.substring(1));
         let fontColor = ''; // don't override by default
         if (parsedBackgroundColor) {
             // Counting the perceptive luminance - human eye favors green color...
-            const luminance = (0.299 * parsedBackgroundColor[1] + 0.587 * parsedBackgroundColor[2] + 0.114 * parsedBackgroundColor[3]) / 255;
+            const luminance = (0.299 * parsedBackgroundColor[0] + 0.587 * parsedBackgroundColor[1] + 0.114 * parsedBackgroundColor[2]) / 255;
             if (luminance > 0.5) {
                 fontColor = 'rgb(62, 62, 62)'; // bright colors - black font
             } else {
@@ -100,7 +109,6 @@ class BetterButtonCard extends HTMLElement {
         this._config = Object.assign({
             icon_size: "40%",
             colors_by_state: {},
-            fallback_color: "var(--primary-text-color)", //Default color if there is no state defined or auto returns something useless
             show_state_label: true,
             show_label: true,
             color_style: COLOR_STYLES.BACKGROUND
@@ -179,12 +187,16 @@ class BetterButtonCard extends HTMLElement {
         const color = HELPERS.getColorForState(state, this._config);
         const fontColor = HELPERS.getFontColorBasedOnBackgroundColor(color);
 
+        this.content.style.cssText = "";
 
         if (this._config.color_style === COLOR_STYLES.BACKGROUND) {
-            this.content.style.cssText = `color: ${fontColor}; background-color: ${color}; ${this._config.card_style};`;
-        } else {
-            this.content.style.cssText = `${this._config.card_style}`;
+            this.content.style.cssText += `color: ${fontColor};`;
+            if(color) {
+                this.content.style.cssText += ` background-color: ${color};`;
+            }
         }
+
+        this.content.style.cssText += ` ${this._config.card_style}`;
 
 
         const buttonElem = document.createElement("paper-button");
@@ -217,12 +229,11 @@ class BetterButtonCard extends HTMLElement {
             const labelElem = document.createElement("div");
             let label = this._config.label;
 
-            if(!this._config.label && state && state.attributes) {
+            if(!this._config.label && state && state.attributes && state.attributes.friendly_name) {
                 label = state.attributes.friendly_name;
             }
 
-
-            labelElem.innerText = label;
+            labelElem.innerText = label ? label : "";
 
             buttonContentContainer.appendChild(labelElem);
         }

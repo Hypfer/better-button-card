@@ -10,6 +10,25 @@ const ACTIONS = {
 };
 
 const HELPERS = {
+    getColorForState: function (state, config) {
+        let color = config.fallback_color;
+
+        if (state) {
+            const stateColor = config.colors_by_state[state.state];
+
+            if (stateColor) {
+                if (stateColor === 'auto') {
+                    // noinspection JSUnresolvedVariable
+                    color = state.attributes.rgb_color ? `rgb(${state.attributes.rgb_color.join(',')})` : config.fallback_color;
+                } else {
+                    color = stateColor;
+                }
+            }
+        }
+
+        return color;
+    },
+
     getFontColorBasedOnBackgroundColor: function (backgroundColor) {
         const parsedRgbColor = backgroundColor.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
         const parsedBackgroundColor = parsedRgbColor ? parsedRgbColor : this.hexToRgb(backgroundColor.substring(1));
@@ -25,6 +44,7 @@ const HELPERS = {
         }
         return fontColor;
     },
+
     hexToRgb: function (hex) {
         const bigint = parseInt(hex, 16);
         const r = (bigint >> 16) & 255;
@@ -33,27 +53,7 @@ const HELPERS = {
 
         return [r, g, b];
     },
-    buildCssColorAttribute: function (state, config) {
-        let color = config.color;
 
-        if (state) {
-            let configState = config.state ? config.state.find(configState => {
-                return configState.value === state.state;
-            }) : false;
-            if (configState) {
-                color = configState.color ? configState.color : config.color_off;
-                if (configState.color === 'auto') {
-                    color = state.attributes.rgb_color ? `rgb(${state.attributes.rgb_color.join(',')})` : configState.default_color;
-                }
-            } else {
-                if (config.color === 'auto') {
-                    color = state.attributes.rgb_color ? `rgb(${state.attributes.rgb_color.join(',')})` : config.default_color;
-                }
-                color = state.state === 'on' ? color : config.color_off;
-            }
-        }
-        return color;
-    },
     buildIcon(state, config) {
         let iconOff = config.icon;
 
@@ -81,15 +81,19 @@ class BetterButtonCard extends HTMLElement {
      * @param [config.title] {string}
      * @param [config.entity] {string}
      * @param [config.icon] {string}
-     * @param [config.color] {string}
      * @param [config.size] {string}
-     * @param [config.color_off] {string}
-     * @param [config.default_color] {string}
+     * @param [config.fallback_color] {string}
+     *
+     * @param [config.colors_by_state] {object}
+     * @param [config.colors_by_state.off] {string} //example. Can be a string or "auto" to pull from state
+     *
      * @param [config.name] {string}
      * @param [config.show_state_label] {boolean}
      * @param [config.color_style] {COLOR_STYLES}
      * @param [config.style] custom CSS as seen in button-card
+     *
      * @param [config.action] {ACTIONS}
+     *
      * @param [config.service] {object}
      * @param config.service.domain {string}
      * @param config.service.action {string}
@@ -97,18 +101,27 @@ class BetterButtonCard extends HTMLElement {
      */
     setConfig(config) {
         const root = this.shadowRoot;
-        if (root.lastChild) root.removeChild(root.lastChild);
+        try { //This happens on invalid configs
+            if (root.lastChild) root.removeChild(root.lastChild);
+        } catch(e) {}
+
 
         //Defaults
         this._config = Object.assign({
-            color: "var(--primary-text-color)",
             size: "40%",
-            color_off: "var(--disabled-text-color)",
-            default_color: "var(--primary-text-color)",
+            colors_by_state: {},
+            fallback_color: "var(--primary-text-color)", //Default color if there is no state defined or auto returns something useless
             name: "",
             show_state_label: true,
             color_style: COLOR_STYLES.BACKGROUND
         }, config);
+
+        this._config.colors_by_state = Object.assign({
+            off: "var(--disabled-text-color)",
+            on: "auto",
+            unavailable: "yellow"
+        }, config.colors_by_state);
+
         this._config.card_style = '';
 
         if (config.style) {
@@ -163,7 +176,7 @@ class BetterButtonCard extends HTMLElement {
 
     render(state) {
         //clear Element
-        try {
+        try { //This happens on invalid configs
             while (this.content.firstChild) {
                 this.content.removeChild(this.content.firstChild);
             }
@@ -173,7 +186,7 @@ class BetterButtonCard extends HTMLElement {
 
 
         //Render new
-        const color = HELPERS.buildCssColorAttribute(state, this._config);
+        const color = HELPERS.getColorForState(state, this._config);
         const fontColor = HELPERS.getFontColorBasedOnBackgroundColor(color);
 
 
@@ -221,6 +234,7 @@ class BetterButtonCard extends HTMLElement {
             const stateElem = document.createElement("span");
 
             if(state) {
+                // noinspection JSUnresolvedVariable
                 stateElem.innerText = `${state.state} ${state.attributes.unit_of_measurement ? state.attributes.unit_of_measurement : ''}`;
             } else {
                 stateElem.innerText = "unknown";
@@ -268,6 +282,7 @@ class BetterButtonCard extends HTMLElement {
         }
     }
 
+    // noinspection JSMethodCanBeStatic
     getCardSize() {
         return 3;
     }

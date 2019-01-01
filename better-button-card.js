@@ -53,18 +53,6 @@ const HELPERS = {
 
         return [r, g, b];
     },
-
-    buildIcon(state, config) {
-        let iconOff = config.icon;
-
-        if (config.icon === 'attribute') {
-            if (state) {
-                return state.attributes.icon;
-            }
-            return iconOff;
-        }
-        return iconOff;
-    }
 };
 
 
@@ -80,14 +68,16 @@ class BetterButtonCard extends HTMLElement {
      * @param config {object}
      * @param [config.title] {string}
      * @param [config.entity] {string}
+     * @param [config.label] {string}
+     * @param [config.show_label] {boolean}
+     *
      * @param [config.icon] {string}
-     * @param [config.size] {string}
+     * @param [config.icon_size] {string}
      * @param [config.fallback_color] {string}
      *
      * @param [config.colors_by_state] {object}
      * @param [config.colors_by_state.off] {string} //example. Can be a string or "auto" to pull from state
      *
-     * @param [config.name] {string}
      * @param [config.show_state_label] {boolean}
      * @param [config.color_style] {COLOR_STYLES}
      * @param [config.style] custom CSS as seen in button-card
@@ -108,11 +98,11 @@ class BetterButtonCard extends HTMLElement {
 
         //Defaults
         this._config = Object.assign({
-            size: "40%",
+            icon_size: "40%",
             colors_by_state: {},
             fallback_color: "var(--primary-text-color)", //Default color if there is no state defined or auto returns something useless
-            name: "",
             show_state_label: true,
+            show_label: true,
             color_style: COLOR_STYLES.BACKGROUND
         }, config);
 
@@ -213,7 +203,7 @@ class BetterButtonCard extends HTMLElement {
         if (this._config.icon) {
             const iconElem = document.createElement("ha-icon");
             iconElem.classList.add("button-card-icon");
-            iconElem.style.cssText = `width: ${this._config.size}; height: ${this._config.size};`; //TODO: both?
+            iconElem.style.cssText = `width: ${this._config.icon_size}; height: ${this._config.icon_size};`; //TODO: both?
 
             if(this._config.color_style === COLOR_STYLES.ICON) {
                 iconElem.style.cssText += `color: ${color}`
@@ -223,15 +213,22 @@ class BetterButtonCard extends HTMLElement {
             buttonContentContainer.appendChild(iconElem);
         }
 
-        if (this._config.name) {
-            const nameElem = document.createElement("span");
-            nameElem.innerText = this._config.name;
+        if (this._config.show_label === true) {
+            const labelElem = document.createElement("div");
+            let label = this._config.label;
 
-            buttonContentContainer.appendChild(nameElem);
+            if(!this._config.label && state && state.attributes) {
+                label = state.attributes.friendly_name;
+            }
+
+
+            labelElem.innerText = label;
+
+            buttonContentContainer.appendChild(labelElem);
         }
 
         if (this._config.show_state_label && this._config.entity && state) {
-            const stateElem = document.createElement("span");
+            const stateElem = document.createElement("div");
 
             if(state) {
                 // noinspection JSUnresolvedVariable

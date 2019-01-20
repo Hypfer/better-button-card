@@ -6,7 +6,8 @@ const COLOR_STYLES = {
 const ACTIONS = {
     TOGGLE: "toggle",
     MORE_INFO: "more_info",
-    SERVICE: "service"
+    SERVICE: "service",
+    NAVIGATE: "navigate"
 };
 
 const HELPERS = {
@@ -79,6 +80,7 @@ class BetterButtonCard extends HTMLElement {
      * @param [config.entity] {string}
      * @param [config.label] {string}
      * @param [config.show_label] {boolean}
+     * @param [config.clickable] {boolean} //if not set it will default to true if there is an entity ID
      *
      * @param [config.icon] {string}
      * @param [config.icon_size] {string}
@@ -97,6 +99,8 @@ class BetterButtonCard extends HTMLElement {
      * @param config.service.domain {string}
      * @param config.service.action {string}
      * @param config.service.data {object}
+     *
+     * @param [config.navigation_path] {string}
      */
     setConfig(config) {
         const root = this.shadowRoot;
@@ -121,6 +125,10 @@ class BetterButtonCard extends HTMLElement {
         }, config.colors_by_state);
 
         this._config.card_style = '';
+
+        if(this._config.clickable === undefined && this._config.entity !== undefined) {
+            this._config.clickable = true;
+        }
 
         if (config.style) {
             config.style.forEach((cssObject) => {
@@ -203,7 +211,7 @@ class BetterButtonCard extends HTMLElement {
         buttonElem.classList.add("button-card-button");
 
         //No click ripple for cards with no entities
-        if(this._config.entity === undefined) {
+        if(!this._config.clickable) {
             buttonElem.setAttribute('noink', '');
             buttonElem.classList.add("button-card-button-not-a-button");
         }
@@ -257,10 +265,12 @@ class BetterButtonCard extends HTMLElement {
     }
 
     handleClick() {
-        if(this._config.entity) {
+        let event;
+
+        if(this._config.clickable) {
             switch(this._config.action) {
                 case ACTIONS.MORE_INFO:
-                    const event = new Event("hass-more-info", {
+                    event = new Event("hass-more-info", {
                         bubbles: true,
                         cancelable: false,
                         composed: true
@@ -280,12 +290,22 @@ class BetterButtonCard extends HTMLElement {
                         this._config.service.data
                     );
                     break;
+                case ACTIONS.NAVIGATE:
+                    history.pushState(null, "", this._config.navigation_path);
+                    event = new Event("location-changed", {
+                        bubbles: true,
+                        cancelable: false,
+                        composed: true
+                    });
 
+                    this.shadowRoot.dispatchEvent(event);
+                    break;
                 case ACTIONS.TOGGLE:
                 default:
                     this._hass.callService("homeassistant", "toggle", {
                         entity_id: this._config.entity,
-                    })
+                    });
+
             }
         }
     }

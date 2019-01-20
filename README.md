@@ -30,6 +30,7 @@ Also, the configuration is slightly different since I've fixed a few bad design 
 | type | string | **required** | `custom:better-button-card` | Type of the card
 | title | string | optional | `Foo bar` | Display a title on top of the card
 | entity | string | optional | `switch.ac` | entity_id
+| clickable | boolean | optional | `true` | If not set it will default to true if there is an entity_id
 | label | string | optional | `Your ad here` | Custom label. Leave undefined to default to `friendly_name` attribute
 | show_label | boolean | optional | `false` | Hide label
 | show_state_label | boolean | optional | `false` | Hide the textual representation of the entity state
@@ -39,8 +40,9 @@ Also, the configuration is slightly different since I've fixed a few bad design 
 | colors_by_state | object | optional | `some_state: "yellow"` | Set colors for each state. Use `auto` to fetch from `rgb_color` if it exists.
 | color_style | string | optional | `background` or `icon` | Determines how the color should be applied. See feature list above
 | style | list | optional | `- text-transform: none` | Custom css attributes for the card
-| action | string | optional | undefined or `toggle`, `more_info`, `service` | Define what should happen if the card is clicked
+| action | string | optional | undefined or `toggle`, `more_info`, `service`, `navigate` | Define what should happen if the card is clicked
 | service | object | optional | 3 Properties: `domain`, `action`, `data` | If action is set to `service`, this defines which service is called with what
+| navigation_path | string | optional | `/lovelace/1` | If action is set to `navigate`, this defines where it should navigate to
 
 ## Instructions
 

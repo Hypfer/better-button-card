@@ -207,7 +207,7 @@ class BetterButtonCard extends HTMLElement {
         this.content.style.cssText += ` ${this._config.card_style}`;
 
 
-        const buttonElem = document.createElement("paper-button");
+        const buttonElem = document.createElement("mwc-button");
         buttonElem.classList.add("button-card-button");
 
         //No click ripple for cards with no entities
